@@ -1,15 +1,18 @@
 #import "MappSdkPlugin.h"
-#import <AppoxeeSDK.h>
-#import <AppoxeeInappSDK.h>
-#import <WebKit/WebKit.h>
+#import "PushMessageDelegate.h"
+#import "InAppMessageDelegate.h"
 
-@interface MappSdkPlugin ()
-@property WKWebView* webView;
+static FlutterMethodChannel *channel;
+
+@interface MappSdkPlugin () <AppoxeeInappDelegate>
+
 @end
 
 @implementation MappSdkPlugin
+
+
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  FlutterMethodChannel* channel = [FlutterMethodChannel
+  channel = [FlutterMethodChannel
       methodChannelWithName:@"mapp_sdk"
             binaryMessenger:[registrar messenger]];
   MappSdkPlugin* instance = [[MappSdkPlugin alloc] init];
@@ -21,8 +24,15 @@
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
   } else if ([@"engage" isEqualToString:call.method]){
     NSNumber* severNumber = call.arguments[2];
-    [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:NULL andDelegate:NULL with:TEST];
-    [[AppoxeeInapp shared] engageWithDelegate:NULL with:tEST];
+    PushMessageDelegate* pushMessageDelegate = [[PushMessageDelegate alloc] initWith:channel];
+      InAppMessageDelegate* inAppMessageDelegate = [[InAppMessageDelegate alloc] initWith:channel];
+    [pushMessageDelegate addNotificationListeners];
+    [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:NULL andDelegate:pushMessageDelegate with:TEST];
+    [inAppMessageDelegate addNotificationListeners];
+    [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:NULL andDelegate:inAppMessageDelegate with:TEST];
+    [[AppoxeeInapp shared] engageWithDelegate:inAppMessageDelegate with:tEST];
+
+
   } else if ([@"postponeNotificationRequest" isEqualToString:call.method]){
     BOOL value = call.arguments[0];
     [[Appoxee shared] setPostponeNotificationRequest:value];
@@ -119,17 +129,13 @@
   } else if ([@"triggerInApp" isEqualToString:call.method]){
     NSString * eventName = call.arguments[0];
     [[AppoxeeInapp shared]reportInteractionEventWithName: eventName andAttributes:NULL];
-  } else if ([@"showWebView" isEqualToString:call.method]){
-    WKWebViewConfiguration* configuration = [[WKWebViewConfiguration alloc] init];
-        UIViewController* base = [[[UIApplication sharedApplication] keyWindow] rootViewController];
-        UIViewController* topViewController = [self topViewController:base];
-        
-        if(topViewController) {
-            self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 500, 500) configuration:configuration];
-            [[topViewController view] addSubview:self.webView];
-            NSURLRequest* request = [[NSURLRequest alloc] initWithURL:[[NSURL alloc] initWithString:@"https://www.google.com"]];
-            [self.webView loadRequest:request];
-        }
+  } else if ([@"fetchInboxMessage" isEqualToString:call.method]){
+    [[AppoxeeInapp shared] fetchAPXInBoxMessages];
+    NSLog(@"This is fetchAPXInBox");
+  } else if ([@"fetchInBoxMessageWithMessageId" isEqualToString:call.method]){
+    NSNumber * messageId = call.arguments[0];
+    [[AppoxeeInapp shared] fetchInBoxMessageWithMessageId:[messageId stringValue]];
+    NSLog(@"This is fetchInBoxMessageWithMessageId");
   } else {
     result(FlutterMethodNotImplemented);
   }

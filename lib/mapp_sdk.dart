@@ -4,7 +4,65 @@ import 'package:flutter/services.dart';
 import 'helper_classes.dart';
 
 class MappSdk {
-  static const MethodChannel _channel = MethodChannel('mapp_sdk');
+  //static const MethodChannel _channel = MethodChannel('mapp_sdk');
+
+  static MethodChannel _privateChannel = const MethodChannel('mapp_sdk');
+
+  static MethodChannel get _channel {
+    if (_privateChannel == null) {
+      _privateChannel = const MethodChannel('mapp_sdk');
+    }
+    _privateChannel!.setMethodCallHandler(_platformCallHandler);
+    return _privateChannel!;
+  }
+
+  //inapp handlers
+  static late void Function(dynamic) didReceiveDeepLinkWithIdentifier;
+  static late void Function(dynamic) didReceiveInappMessageWithIdentifier;
+  static late void Function(dynamic) didReceiveCustomLinkWithIdentifier;
+  static late void Function(dynamic) didReceiveInBoxMessages;
+  static late void Function(dynamic) inAppCallFailedWithResponse;
+  static late void Function(dynamic) didReceiveInBoxMessage;
+
+  //push notification handlers
+  static late void Function(dynamic) handledRemoteNotification;
+  static late void Function(dynamic) handledRichContent;
+
+  static Future<void> _platformCallHandler(MethodCall call) {
+    try {
+      switch (call.method) {
+        case 'didReceiveDeepLinkWithIdentifier':
+          didReceiveDeepLinkWithIdentifier(call.arguments);
+          break;
+        case 'didReceiveInappMessageWithIdentifier':
+          didReceiveInappMessageWithIdentifier(call.arguments);
+          break;
+        case 'didReceiveCustomLinkWithIdentifier':
+          didReceiveCustomLinkWithIdentifier(call.arguments);
+          break;
+        case 'didReceiveInBoxMessages':
+          didReceiveInBoxMessages(call.arguments);
+          break;
+        case 'inAppCallFailedWithResponse':
+          inAppCallFailedWithResponse(call.arguments);
+          break;
+        case 'didReceiveInBoxMessage':
+          didReceiveInBoxMessage(call.arguments);
+          break;
+        case 'handledRemoteNotification':
+          handledRemoteNotification(call.arguments);
+          break;
+        case 'handledRichContent':
+          handledRichContent(call.arguments);
+          break;
+        default:
+          print('Unknowm method ${call.method} ');
+      }
+    } catch (e) {
+      print(e);
+    }
+    return Future.value();
+  }
 
   static Future<String?> get platformVersion async {
     final String? version = await _channel.invokeMethod('getPlatformVersion');
@@ -133,14 +191,14 @@ class MappSdk {
     return returnValue;
   }
 
-  static Future<String?> showWebView() async {
-    final String returnValue = await _channel.invokeMethod('showWebView');
+  static Future<dynamic> fetchInboxMessage() async {
+    final String returnValue = await _channel.invokeMethod('fetchInboxMessage');
     return returnValue;
   }
 
-  static Future<String?> showWebViewNbaPlayer() async {
-    final String returnValue = await _channel.invokeMethod('triggerWebview');
-    print("play will be displayed");
+  static Future<String?> fetchInBoxMessageWithMessageId(int value) async {
+    final String returnValue =
+        await _channel.invokeMethod('fetchInBoxMessageWithMessageId', [value]);
     return returnValue;
   }
 }

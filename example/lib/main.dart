@@ -48,6 +48,46 @@ class _HomePageState extends State<HomePage> {
     initPlatformState();
   }
 
+  void didReceiveDeepLinkWithIdentifierHandler(dynamic arguments) {
+    print("deep link received!");
+    print(arguments);
+  }
+
+  void didReceiveInappMessageWithIdentifierHandler(dynamic arguments) {
+    print("Inapp message received!");
+    print(arguments);
+  }
+
+  void didReceiveCustomLinkWithIdentifierHandler(dynamic arguments) {
+    print("Custom Link With Identifier received!");
+    print(arguments);
+  }
+
+  void didReceiveInBoxMessagesHandler(dynamic arguments) {
+    print("Inbox Messages received!");
+    print(arguments);
+  }
+
+  void inAppCallFailedWithResponseHandler(dynamic arguments) {
+    print("inApp Call Failed received!");
+    print(arguments);
+  }
+
+  void didReceiveInBoxMessageHandler(dynamic arguments) {
+    print("Inbox Message received!");
+    print(arguments);
+  }
+
+  void remoteNotificationHandler(dynamic arguments) {
+    print("remote Notification received!");
+    print(arguments);
+  }
+
+  void richContentHandler(dynamic arguments) {
+    print("rich Content received!");
+    print(arguments);
+  }
+
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     String? platformVersion;
@@ -235,9 +275,16 @@ class _HomePageState extends State<HomePage> {
       MappSdk.logOut(false);
     } else if (_screens[index] == "In App: App Open") {
       MappSdk.triggerInApp("app_open");
+    } else if (_screens[index] == "Fetch inbox messages") {
+      MappSdk.fetchInboxMessage();
     } else if (_screens[index] == "In App: App Feedback") {
-      //MappSdk.showWebView();
-      MappSdk.showWebViewNbaPlayer();
+      //FetchInBox se koristi samo za testiranje
+      // MappSdk.fetchInBoxMessageWithMessageId(18870);
+      MappSdk.triggerInApp("app_feedback");
+    } else if (_screens[index] == "In App: App Discount") {
+      MappSdk.triggerInApp("app_discount");
+    } else if (_screens[index] == "In App: App Promo") {
+      MappSdk.triggerInApp("app_promo");
     }
   }
 
@@ -252,6 +299,26 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    MappSdk.engage(
+        "sdk key", "google projec id", SERVER.TEST, "app id", "tennant id");
+    MappSdk.didReceiveDeepLinkWithIdentifier = (dynamic arguments) =>
+        didReceiveDeepLinkWithIdentifierHandler(arguments);
+    MappSdk.didReceiveInappMessageWithIdentifier = (dynamic arguments) =>
+        didReceiveInappMessageWithIdentifierHandler(arguments);
+    MappSdk.didReceiveCustomLinkWithIdentifier = (dynamic arguments) =>
+        didReceiveCustomLinkWithIdentifierHandler(arguments);
+    MappSdk.didReceiveInBoxMessages =
+        (dynamic arguments) => didReceiveInBoxMessagesHandler(arguments);
+    MappSdk.inAppCallFailedWithResponse =
+        (dynamic arguments) => inAppCallFailedWithResponseHandler(arguments);
+    MappSdk.didReceiveInBoxMessage =
+        (dynamic arguments) => didReceiveInBoxMessageHandler(arguments);
+
+    MappSdk.handledRemoteNotification =
+        (dynamic arguments) => remoteNotificationHandler(arguments);
+    MappSdk.handledRichContent =
+        (dynamic arguments) => richContentHandler(arguments);
+
     return MaterialApp(
       home: Scaffold(
           appBar: AppBar(
