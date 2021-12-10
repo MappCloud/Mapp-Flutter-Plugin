@@ -33,3 +33,6 @@ android {
         minSdkVersion 16
     }
 }
+dependencies{
+    implementation('com.mapp.sdk:mapp-android:6.0.17-special14')
+}
