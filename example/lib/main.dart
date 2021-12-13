@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -38,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   String? _tagToSetString = '';
   String? _tagToRemoveString = '';
   String? _stringToSetString = '';
+  String? _attributeToGetString='';
   String? _stringToRemoveString = '';
 
   List<String> _screens = [];
@@ -172,8 +175,8 @@ class _HomePageState extends State<HomePage> {
           child: TextFormField(
             decoration: const InputDecoration(
                 border: UnderlineInputBorder(), labelText: 'Enter alias'),
-            onSaved: (String? value) {
-              _aliasToSetString = value;
+            onChanged: (String? value){
+              _aliasToSetString=value?.trim();
             },
           ),
         );
@@ -182,8 +185,8 @@ class _HomePageState extends State<HomePage> {
           child: TextFormField(
             decoration: const InputDecoration(
                 border: UnderlineInputBorder(), labelText: 'Set tag'),
-            onSaved: (String? value) {
-              _tagToSetString = value;
+            onChanged: (String? value) {
+              _tagToSetString = value?.trim();
             },
           ),
         );
@@ -192,8 +195,8 @@ class _HomePageState extends State<HomePage> {
           child: TextFormField(
             decoration: const InputDecoration(
                 border: UnderlineInputBorder(), labelText: 'Remove tag'),
-            onSaved: (String? value) {
-              _tagToRemoveString = value;
+            onChanged: (String? value) {
+              _tagToRemoveString = value?.trim();
             },
           ),
         );
@@ -202,8 +205,8 @@ class _HomePageState extends State<HomePage> {
           child: TextFormField(
             decoration: const InputDecoration(
                 border: UnderlineInputBorder(), labelText: 'Set Attribute'),
-            onSaved: (String? value) {
-              _stringToSetString = value;
+            onChanged: (String? value) {
+              _stringToSetString = value?.trim();
             },
           ),
         );
@@ -212,15 +215,17 @@ class _HomePageState extends State<HomePage> {
           child: TextFormField(
             decoration: const InputDecoration(
                 border: UnderlineInputBorder(), labelText: 'Get attribute'),
-          ),
+          onChanged: (String? value){
+              _attributeToGetString=value?.trim();
+          },),
         );
       case 23:
         return Card(
           child: TextFormField(
             decoration: const InputDecoration(
                 border: UnderlineInputBorder(), labelText: 'Remove attribute'),
-            onSaved: (String? value) {
-              _stringToRemoveString = value;
+            onChanged: (String? value) {
+              _stringToRemoveString = value?.trim();
             },
           ),
         );
@@ -242,18 +247,23 @@ class _HomePageState extends State<HomePage> {
 
   void onTap(int index) {
     if (_screens[index] == "Engage") {
-      MappSdk.engage(
-          "sdk key", "google projec id", SERVER.TEST, "app id", "tennant id");
+      MappSdk.engage(Config.sdkKey,Config.googleProjectId,Config.server, Config.appID, Config.tenantID);
     } else if (_screens[index] == "Set Device Alias") {
-      if (_aliasToSetString != null) {
+      if (_aliasToSetString?.isNotEmpty ?? false) {
         MappSdk.setAlias(_aliasToSetString!);
+      }else{
+        _showMyDialog('Alias', "Not set", "Alias can't be empty");
       }
     } else if (_screens[index] == "Get Device Alias") {
       MappSdk.getAlias().then(
           (String value) => {_showMyDialog("Show Alias", "Alias:", value)});
     } else if (_screens[index] == "Device Information") {
-      MappSdk.getDeviceInfo().then((String value) =>
-          {_showMyDialog("Show Device Information", "", value)});
+      String data='';
+      MappSdk.getDeviceInfo().then((Map<String, dynamic>? map)
+          {
+            data=map!=null ? jsonEncode(map) : "null";
+            _showMyDialog("Device info", "", data);
+          });
     } else if (_screens[index] == "Is Push Enabled") {
       MappSdk.isPushEnabled().then((bool value) =>
           {_showMyDialog("Show Device Information", "", value ? "YES" : "NO")});
@@ -299,8 +309,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    MappSdk.engage(
-        "sdk key", "google projec id", SERVER.TEST, "app id", "tennant id");
+    MappSdk.engage(Config.sdkKey,Config.googleProjectId,Config.server, Config.appID, Config.tenantID);
+
     MappSdk.didReceiveDeepLinkWithIdentifier = (dynamic arguments) =>
         didReceiveDeepLinkWithIdentifierHandler(arguments);
     MappSdk.didReceiveInappMessageWithIdentifier = (dynamic arguments) =>
