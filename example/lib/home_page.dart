@@ -9,21 +9,21 @@ import 'package:mapp_sdk_example/deep_link_page.dart';
 import 'package:mapp_sdk/mapp_sdk.dart';
 import 'package:mapp_sdk/helper_classes.dart';
 
-class Config {
-  static const String sdkKey = "183408d0cd3632.83592719";
-  static const String appID = "206974";
-  static const String googleProjectId = "785651527831";
-  static const String tenantID = "5963";
-  static const SERVER server = SERVER.L3;
-}
-
 // class Config {
-//   static const String sdkKey = "187b8432cc7644.91361308";
-//   static const String appID = "207036";
-//   static const String googleProjectId = "498892612269";
+//   static const String sdkKey = "183408d0cd3632.83592719";
+//   static const String appID = "206974";
+//   static const String googleProjectId = "785651527831";
 //   static const String tenantID = "5963";
 //   static const SERVER server = SERVER.L3;
 // }
+
+class Config {
+  static const String sdkKey = "187b8432cc7644.91361308";
+  static const String appID = "207036";
+  static const String googleProjectId = "498892612269";
+  static const String tenantID = "5915";
+  static const SERVER server = SERVER.L3;
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
